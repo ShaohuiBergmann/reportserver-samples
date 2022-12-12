@@ -7,6 +7,7 @@ import java.io.File
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 import java.nio.file.Paths
+import groovy.json.JsonOutput;
 
 /**
  * logger.groovy
@@ -36,13 +37,17 @@ File[] listOfFiles = folder.listFiles()
 //  funtion to read the file content //
 
 def readLogFile(file) {
-String fileContents = new File(file).text
-    tout.println("content: " + fileContents)
+ String fileContents = new File(file).text
+ return JsonOutput.toJson(fileContents);
+ //   tout.println("content: " + fileContents)
 }
 
-def logLatestFile(date) (
+def getLatestFileOfEach(fileMap) {
+def latestFileDates = [:]
+fileMap.each{fileName, dates -> return  readLogFile(Paths.get(curDir, fileName, dates.last()).toString()) }
+// tout.println("latestFileDates: " + latestFileDates) 
 
-)
+}
 
 Pattern pattern = Pattern.compile(/(?<prefix>.*)(?<date>\d{4}-\d\d-\d\d).*/, Pattern.CASE_INSENSITIVE)
 
@@ -70,7 +75,8 @@ listOfFiles.each { file ->
             map[matcher.group('prefix')] = [matcher.group('date')]
         }
 // get the content of the file
-    readLogFile(Paths.get(curDir, file.getName()).toString())
+    getLatestFileOfEach(map)
+   // readLogFile(Paths.get(curDir, file.getName()).toString())
 
     } else {
         tout.println('Match not found ' + file.getName())
@@ -78,7 +84,8 @@ listOfFiles.each { file ->
 }
 
 
-tout.println('map out of loop: ' + map)
+
+// tout.println('map out of loop: ' + map)
 tout.println 'Executing logger.groovy'
 tout.println 'log getLogDir ' + logfileservice.getLogDirectory()
 
