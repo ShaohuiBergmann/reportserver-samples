@@ -63,8 +63,8 @@ def result = new RSTableModel(tableDefinition: tableDefinition)
 
 GLOBALS.getEntitiesByType(TeamSpace).each{ ts ->
    tsDiskService.getGeneralReferencesFor(ts)
-  	.findAll{ !(it instanceof TsDiskFileReference) }
-  	.each{ reportRef ->
+      .findAll{ !(it instanceof TsDiskFileReference) }
+      .each{ reportRef ->
          def report = (!(reportRef instanceof TsDiskReportReference)? reportRef.compiledReport.report : reportRef.report)
          def baseReport = (null != report && report instanceof ReportVariant) ? report.parent : null
          def referencePath = reportRef.rootLine.collect({reportRef.name}).reverse().join("/")
