@@ -32,43 +32,28 @@ def curDir = logfileservice.getLogDirectory()
 File folder = new File(curDir)
 // logs all the files in the dir
 File[] listOfFiles = folder.listFiles()
-  //       tout.println('filelist ' + listOfFiles)
+  // tout.println('filelist ' + listOfFiles)
 
-//  funtion to read the file content //
+//----------funtion to read the file content------------ //
 
 def readLogFile(filePaths) {
     filePaths = filePaths.collect { path ->
         def newFile = new File(path)
         if (newFile.exists()) {
-            return [content : newFile.text, path : path]
+            return [content : newFile.text, filePath : path]
         }
     }
-    //         // tout.println "path" + path
-    //         try {
-    //             return [path : new File(path).text]
-    //   } catch (Exception e) {
-    //             //println("Exception: ${e}")
-    //             try {
-    //                 return [path : new File(path.replace('.log', '.txt')).text]
-    //      }catch (Exception ex) {
-    //             //println("nested Exception: ${ex}")
-    //             }
-    //         }
-    //         //return [path : new File(path).text]
-    //         return path
-    //     }
-    //  String fileContents = new File(filePath).text
-    //   tout.println('content: ' + JsonOutput.toJson(fileContents))
-    return JsonOutput.toJson(filePaths)
+    return JsonOutput.toJson([data : filePaths])
 }
+
+//----------funtion to get full file path------------ //
 
 def getEachFilePath(curDir, fileMap) {
     // get the full path to each file
     def newFilePaths = []
     fileMap.each { fileName, dates -> dates.each { date -> newFilePaths.add(curDir + '/' + fileName + date + '.log')  }
 }
-
-    tout.println('full file path: ' + newFilePaths)
+    //tout.println('full file path: ' + newFilePaths)
     return newFilePaths
 }
 
@@ -78,12 +63,12 @@ Pattern pattern = Pattern.compile(/(?<prefix>.*)(?<date>\d{4}-\d\d-\d\d).*/, Pat
 
 listOfFiles.each { file ->
     Matcher matcher = pattern.matcher(file.getName())
-    tout.println('matcher: ' + matcher)
+    // tout.println('matcher: ' + matcher)
     boolean matchFound = matcher.find()
     if (matchFound) {
-        //      tout.print('Match found ' + matcher.group('prefix'))
-        //     tout.println(matcher.group('date'))
-        //   tout.println('values in map: ' + map.get(matcher.group('prefix')))
+        //  tout.print('Match found ' + matcher.group('prefix'))
+        //  tout.println(matcher.group('date'))
+        //  tout.println('values in map: ' + map.get(matcher.group('prefix')))
         //  map[matcher.group('prefix')] = matcher.group('date')
         if (map.containsKey(matcher.group('prefix'))) {
             // get the values of the map with the key of regex group "prefix" => the initial date array
@@ -92,26 +77,26 @@ listOfFiles.each { file ->
             dateVal.add(matcher.group('date'))
             // update the existing map
             map[matcher.group('prefix')] = dateVal
-        //           tout.println('dateVal' + dateVal)
+        // tout.println('dateVal' + dateVal)
         } else {
             // when there is no content in the map, add an array containing the first observed date
             map[matcher.group('prefix')] = [matcher.group('date')]
         }
-        // get the content of the file
-
-    // readLogFile(Paths.get(curDir, file.getName()).toString())
     } else {
         tout.println('Match not found ' + file.getName())
     }
 }
 
-def filePath = getEachFilePath(curDir, map)
-def logMap = readLogFile(filePath)
-tout.println logMap
-return logMap
 tout.println('map out of loop: ' + map)
-tout.println 'Executing logger.groovy'
-tout.println 'log getLogDir ' + logfileservice.getLogDirectory()
+
+def filePath = getEachFilePath(curDir, map)
+def logMapBytes = readLogFile(filePath).getBytes('UTF-8')
+
+logMapBytesEncoded = logMapBytes.encodeBase64()
+return logMapBytesEncoded
+
+// tout.println 'Executing logger.groovy'
+// tout.println 'log getLogDir ' + logfileservice.getLogDirectory()
 
 //in descending order
 logger.log(Level.SEVERE, "$prefix SEVERE-level message")

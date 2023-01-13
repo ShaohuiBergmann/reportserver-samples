@@ -1,7 +1,5 @@
 * {
   box-sizing: border-box;
-  
-  
 }
 
 .row {
@@ -12,10 +10,10 @@
 #date {
   offset: 2rem;
 }
+
 .container {
   width: 100vw;
   height: 100vh;
- 
 }
 
 section {
@@ -27,6 +25,8 @@ section {
   border: 2px solid rgb(91, 88, 88);
   box-shadow: 5px 8px 5px 5px lightgray;
 }
+
 .box .headbar {
   background-color: #3E4059 ;
 }
+

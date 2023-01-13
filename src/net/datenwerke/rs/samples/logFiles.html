@@ -12,7 +12,10 @@
 			integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65"
 			crossorigin="anonymous"
 		/>
-		<link rel="stylesheet" href="styles.css" />
+		<link
+			rel="stylesheet"
+			href="fileServerAccess?path=/bin/logFileDashboard/styles.css"
+		/>
 	</head>
 	<body>
 		<div class="container">
@@ -23,21 +26,36 @@
 					</div>
 				</div>
 				<div class="col">
-					<div class="box"><input type="date" id="date" /></div>
+					<div class="box"><input type="date" id="dateVal" /></div>
 				</div>
 				<div class="col">
-					<div class="box"><button id="btn">search</button></div>
+					<div class="box">
+						<label for="date">Choose the file you want to read</label>
+					</div>
+				</div>
+				<div class="col">
+					<div class="box">
+						<select>
+							<option>Germany</option>
+						</select>
+					</div>
+				</div>
+				<div class="col">
+					<div class="box">
+						<button id="btn">search</button>
+					</div>
 				</div>
 			</div>
 
 			<div class="row">
 				<div class="col">
 					<div class="box headbar"></div>
-					<div class="box"><section></section></div>
+					<div class="box"><section id="logContent"></section></div>
 				</div>
 			</div>
 		</div>
-		<script src="script.js"></script>
+
+		<script src="fileServerAccess?path=/bin/logFileDashboard/script.js"></script>
 		<script
 			src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
 			integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
