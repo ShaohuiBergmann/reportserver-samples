@@ -31,41 +31,63 @@
 		return convertedDate;
 	}
 	// function that declare an object {filepath: content}
-	const builtObj = (arr) => {
+
+	const createObj = (arr) => {
 		const fileObj = {};
+		// const p = arr[1].replace(/["]/g, " ");
 		fileObj[arr[1]] = arr[0];
-		console.log("fileObj", fileObj);
+		// console.log(fileObj);
+		return fileObj;
 	};
 
-	// function that first gets arrays that contains the values of an object then call builtObj function to make a new obj {filePath: Content}
-	const readFileArr = (arr) => {
-		arr.forEach((el) => {
-			const arrOfVal = Object.values(el);
-			builtObj(arrOfVal);
-			console.log(arrOfVal);
-		});
-
-		// console.log("ArrOfVal", ArrOfVal);
-	};
-
+	// filtered out the files that don't contain any content
 	const filterFileArr = (arr) => {
-		const filteredArr = arr.filter((el) => {
-			console.log("el", el.content);
+		const filteredFileArr = arr.filter((el) => {
+			if (el) {
+				return el.content !== "";
+			}
 		});
-		console.log("first,", filteredArr);
+		return filteredFileArr;
 	};
-	$("#btn").click((e) => {
+
+	// function to add option elements to Dom
+
+	const addOptions = (text) => {
+		const opt = document.createElement("option");
+		const node = document.createTextNode(text);
+		opt.appendChild(node);
+		document.getElementById("opts").appendChild(opt);
+	};
+
+	///////////////////////////////
+	$("#btn").click(() => {
 		console.log("click happened");
 		const dateInputVal = $("#dateVal").val();
+		console.log(dateInputVal);
 		const convertedResult = convertDate(dateInputVal);
 		try {
 			getContent()
 				.then((result) => {
 					const decoded = JSON.parse(atob(result));
 					const fileArr = decoded["data"];
-					const filteredFileArr = filterFileArr(fileArr);
-					//	console.log("filteredFileArr", filteredFileArr);
-					//	readFileArr(fileArr);
+					const filteredArr = filterFileArr(fileArr);
+					const newArrOfVal = [];
+					filteredArr.forEach((el) => {
+						const arrOfVal = Object.values(el);
+						const newObj = createObj(arrOfVal);
+						newArrOfVal.push(newObj);
+						// console.log(newArrOfVal);
+						newArrOfVal.forEach((el) => {
+							Object.keys(el).forEach((prop) => {
+								// console.log(el[prop]);
+								const dateInputVal = $("#dateVal").val();
+								if (prop.includes(dateInputVal)) {
+									console.log(prop);
+									addOptions(prop);
+								}
+							});
+						});
+					});
 				})
 				.catch((e) => console.log("catch e", e));
 		} catch (e) {
