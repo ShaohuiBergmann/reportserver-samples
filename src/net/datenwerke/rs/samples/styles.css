@@ -16,7 +16,7 @@
   height: 100vh;
 }
 
-section {
+#logContent {
   width: 100%;
   height: 400px;
   margin-top: 2rem;
@@ -24,9 +24,8 @@ section {
   background-color: #fff;
   border: 2px solid rgb(91, 88, 88);
   box-shadow: 5px 8px 5px 5px lightgray;
+  overflow: scroll;
+  text-align: center;
 }
 
-.box .headbar {
-  background-color: #3E4059 ;
-}
 
