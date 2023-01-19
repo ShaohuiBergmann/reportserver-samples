@@ -36,18 +36,7 @@
 
 		return newArrOfVal;
 	};
-	///////////function that convert date format e.g. 2023-01-12 to the format of 12-Dec-2022
-	function convertDate(inputValue) {
-		const date = new Date(inputValue);
-		const options = { day: "numeric", month: "short", year: "numeric" };
-		const formattedDate = new Intl.DateTimeFormat("en-GB", options).format(
-			date
-		);
-		const dateArr = formattedDate.split(" ");
-		const convertedDate = [dateArr[0], dateArr[1], dateArr[2]].join("-");
-		console.log("converting to", convertedDate);
-		return convertedDate;
-	}
+
 	///////////function that declare an object {filepath: content}
 
 	const createObj = (arr) => {
@@ -94,34 +83,44 @@
 
 	//////////////////event listener
 	$("#dateVal").change((e) => {
-		getContent().then((result) => {
-			const filteredFileArr = getFilteredFileArr(result);
-			const newArrOfVal = createNewArrOfVar(filteredFileArr);
-			console.log("arr", newArrOfVal);
-			removeNodes("opts");
-			removeNodes("logContent");
-			const arrOfKeys = [];
-			newArrOfVal.forEach((el) => {
+		getContent()
+			.then((result) => {
+				// clear the content of options and log content at everytime choose another day
+				removeNodes("opts");
+				removeNodes("logContent");
+				const filteredFileArr = getFilteredFileArr(result);
+				const newArrOfVal = createNewArrOfVar(filteredFileArr);
 				const dateInputVal = e.target.value;
-				if (Object.keys(el)[0].includes(dateInputVal)) {
-					arrOfKeys.push(Object.keys(el)[0]);
-					console.log("arrKy", arrOfKeys);
-				}
 
+				//filter out all the obj that don't match the date
+
+				const filteredArr = newArrOfVal.filter((filtered) => {
+					return Object.keys(filtered)[0].includes(dateInputVal);
+				});
+
+				if (filteredArr.length == 0) {
+					handleEmptyResult("opts", "option");
+				} else {
+					removeNodes("opts");
+					filteredArr.forEach((el) => {
+						updateNodes("opts", "option", Object.keys(el));
+					});
+				}
 				$("#opts").change((e) => {
 					removeNodes("logContent");
 					const valOfOpts = e.target.value;
-					if (el[valOfOpts]) {
-						updateNodes("logContent", "p", el[valOfOpts]);
-					} else {
-						removeNodes("logContent");
+					const selectedFile = filteredArr.filter((el) => {
+						return el[valOfOpts];
+					});
+					// console.log("select", valOfOpts);
+					// console.log("select", selectedFile);
+					if (selectedFile.length == 0) {
 						handleEmptyResult("logContent", "p");
+					} else {
+						updateNodes("logContent", "p", selectedFile[0][valOfOpts]);
 					}
 				});
-			});
-			arrOfKeys.forEach((prop) => {
-				updateNodes("opts", "option", prop);
-			});
-		});
+			})
+			.catch((e) => console.log("Error", e));
 	});
 })();
