@@ -19,11 +19,11 @@
 		});
 	};
 	//////////function that decode and parse the result from getContent and filterout null and empty files
-	const getFilteredFileArr = (arr) => {
+	const getFilteredFilesWithContent = (arr) => {
 		const decoded = JSON.parse(atob(arr));
 		const fileArr = decoded["data"];
 
-		return filterFileArr(fileArr);
+		return filterOutEmptyFiles(fileArr);
 	};
 	///////////create new array of objects that has the filepath as key and content as value
 	const createNewArrOfObj = (arr) => {
@@ -48,7 +48,7 @@
 	};
 
 	///////////filtered out the files that don't contain any content
-	const filterFileArr = (arr) => {
+	const filterOutEmptyFiles = (arr) => {
 		const filteredFileArr = arr.filter((el) => {
 			if (el) {
 				return el.content !== "";
@@ -66,10 +66,11 @@
 		return Object.keys(obj)[0].match(regex)[0];
 	};
 
-	const filterFilesWithDate = (arr, dateVal) => {
-		return arr.filter((filtered) => {
-			Object.keys(filtered)[0].includes(dateVal);
+	const filterFilesWithCondition = (arr, filterCondition) => {
+		const files = arr.filter((filtered) => {
+			return Object.keys(filtered)[0].includes(filterCondition);
 		});
+		return files;
 	};
 	///////////functions to manipulate option elements to Dom
 
@@ -77,6 +78,8 @@
 		const ele = document.createElement(element);
 		if (element === "textarea") {
 			ele.setAttribute("readonly", true);
+		} else if (element === "option" && text.includes("stdout")) {
+			ele.setAttribute("selected", "selected");
 		}
 		const node = document.createTextNode(text);
 		ele.appendChild(node);
@@ -106,46 +109,51 @@
 	//////////////////event listener
 	window.addEventListener("load", () => {
 		console.log("page is fully loaded");
-
-		const defaultDateVal = $("#dateVal").val();
-		// console.log(defaultDateVal);
 		getContent()
 			.then((result) => {
-				const filteredFileArr = getFilteredFileArr(result);
-				const newArrOfObj = createNewArrOfObj(filteredFileArr);
+				const filteredFilesWithContent = getFilteredFilesWithContent(result);
+				const newArrOfObj = createNewArrOfObj(filteredFilesWithContent);
 				const lastItemInArr = getLastItemInArr(newArrOfObj);
 				const latestDateOfLogs = getDateWithMatcher(lastItemInArr);
-
+				// set the date of the latest available log files as default
 				$("#dateVal").val(new Date().toDateInputValue(latestDateOfLogs));
-				updateNodes("opts", "option", Object.keys(lastItemInArr)[0]);
-				updateNodes(
-					"logContent",
-					"textarea",
-					lastItemInArr[Object.keys(lastItemInArr)[0]]
+
+				const filesFromLatestDate = filterFilesWithCondition(
+					newArrOfObj,
+					latestDateOfLogs
 				);
-				filterFilesWithDate(newArrOfObj, defaultDateVal);
+				// console.log(filesFromLatestDate);
+				const stdoutFileArr = filterFilesWithCondition(
+					filesFromLatestDate,
+					"stdout"
+				);
+
+				filesFromLatestDate.forEach((el) => {
+					updateNodes("opts", "option", Object.keys(el));
+				});
+
 				$("#dateVal").change((e) => {
 					removeNodes("opts");
 					removeNodes("logContent");
-					// const filteredFileArr = getFilteredFileArr(result);
-					// const newArrOfVal = createNewArrOfVar(filteredFileArr);
 					const dateInputVal = e.target.value;
-
 					//filter out all the obj that don't match the date
-					const filteredArr = filterFilesWithDate(newArrOfVal, dateInputVal);
+					const filteredArrWithDateVal = filterFilesWithCondition(
+						newArrOfObj,
+						dateInputVal
+					);
 
-					if (filteredArr.length == 0) {
+					if (filteredArrWithDateVal.length == 0) {
 						handleEmptyResult("opts", "option");
 					} else {
 						removeNodes("opts");
-						filteredArr.forEach((el) => {
+						filteredArrWithDateVal.forEach((el) => {
 							updateNodes("opts", "option", Object.keys(el));
 						});
 					}
 					$("#opts").change((e) => {
 						removeNodes("logContent");
 						const valOfOpts = e.target.value;
-						const selectedFile = filteredArr.filter((el) => {
+						const selectedFile = filteredArrWithDateVal.filter((el) => {
 							return el[valOfOpts];
 						});
 						// console.log("select", valOfOpts);
