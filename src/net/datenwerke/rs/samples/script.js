@@ -74,12 +74,24 @@
 	};
 	///////////functions to manipulate option elements to Dom
 
+	// make the stdout file preselected and the content default value of textarea
+	const makeStdoutDefault = (arr) => {
+		arr.forEach((el) => {
+			const regex = /stdout/gm;
+			console.log("match", Object.keys(el)[0]);
+			if (Object.keys(el)[0].match(regex)) {
+				updateNodes("opts", "option", Object.keys(el)[0]);
+				$("option").attr("selected", "selected");
+				updateNodes("logContent", "textarea", Object.values(el));
+			}
+			updateNodes("opts", "option", Object.keys(el)[0]);
+		});
+	};
+
 	const updateNodes = (selector, element, text) => {
 		const ele = document.createElement(element);
 		if (element === "textarea") {
 			ele.setAttribute("readonly", true);
-		} else if (element === "option" && text.includes("stdout")) {
-			ele.setAttribute("selected", "selected");
 		}
 		const node = document.createTextNode(text);
 		ele.appendChild(node);
@@ -117,20 +129,12 @@
 				const latestDateOfLogs = getDateWithMatcher(lastItemInArr);
 				// set the date of the latest available log files as default
 				$("#dateVal").val(new Date().toDateInputValue(latestDateOfLogs));
-
 				const filesFromLatestDate = filterFilesWithCondition(
 					newArrOfObj,
 					latestDateOfLogs
 				);
 				// console.log(filesFromLatestDate);
-				const stdoutFileArr = filterFilesWithCondition(
-					filesFromLatestDate,
-					"stdout"
-				);
-
-				filesFromLatestDate.forEach((el) => {
-					updateNodes("opts", "option", Object.keys(el));
-				});
+				makeStdoutDefault(filesFromLatestDate);
 
 				$("#dateVal").change((e) => {
 					removeNodes("opts");
@@ -141,14 +145,10 @@
 						newArrOfObj,
 						dateInputVal
 					);
-
 					if (filteredArrWithDateVal.length == 0) {
 						handleEmptyResult("opts", "option");
 					} else {
-						removeNodes("opts");
-						filteredArrWithDateVal.forEach((el) => {
-							updateNodes("opts", "option", Object.keys(el));
-						});
+						makeStdoutDefault(filteredArrWithDateVal);
 					}
 					$("#opts").change((e) => {
 						removeNodes("logContent");
